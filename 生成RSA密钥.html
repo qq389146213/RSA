@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />
+<script language="JavaScript" type="text/javascript" src="cryptico.browser.js"></script>
+<title>生成RSA密钥</title>
+</head>
+
+<body>
+<script type="text/javascript">
+			function showKey()
+			{
+				var psw=document.getElementById("keyForPrivate").value;
+				if(psw==document.getElementById("keyForPrivate2").value){
+					var Bits = 2048;
+					var rsaKey = cryptico.generateRSAKey(psw, Bits);
+					var publicKeyString = cryptico.publicKeyString(rsaKey);
+					var aesKey = cryptico.string2bytes(cryptico.b64to256(
+						"L7UotmZPW5e1DFI3xEN1Y2jfLatPhtNNRNL2Zb/TyUE="));
+					aesKey = cryptico.string2bytes(cryptico.b64to256(
+						cryptico.encryptAESECB(escape(psw), aesKey)));
+					aesKey = aesKey.slice(0, 16);
+					var privateKeyString = cryptico.privateKeyString(rsaKey,aesKey);
+					document.getElementById("publicKey").value=publicKeyString;
+					document.getElementById("privateKey").value=privateKeyString;
+					var myDiv=document.getElementById("err");
+					myDiv.innerText="请记住这个密码以后会用得到";
+				}
+				else{
+					var myDiv=document.getElementById("err");
+					myDiv.innerText="两次输入的密码不一致请重试！";
+				}
+			}
+</script> 
+<p>请设置你的密码：<input type="password" name="keyForPrivate" id="keyForPrivate"></>
+<p>再输入一遍密码：<input type="password" name="keyForPrivate2" id="keyForPrivate2"></>
+<p id="err"></p>
+<p><button onclick="showKey()">先在上方输入密码然后点我生成密钥<br/>（可能需要1分钟左右的时间）</button></>
+<p>生成密钥之后请复制下框中的内容<br/>
+然后粘贴到空文本文件中并保存为：我的公钥.txt</p>
+<textarea name="publicKey" rows="5" cols="30" id="publicKey"></textarea>
+<p>生成密钥之后请复制下框中的内容<br/>
+然后粘贴到空文本文件中并保存为：我的私钥.txt</p>
+<textarea name="privateKey" rows="5" cols="30" id="privateKey"></textarea>
+<p>公钥和私钥一次产生一对 就像鞋子是成双的<br/>
+左脚穿拖鞋右脚穿布鞋可不行哦！</p>
+<p>懂编程或者会网页设计的人可以用记事本打开各个文件<br/>
+查看本程序的具体运行方式和内在逻辑<br/>
+对于不懂代码的人这里简单介绍一下加密和解密<br/>
+加密实际上就是将一些能明确表达某种意思的信息打乱<br/>
+变成一堆乱七八糟的东西。解密自然就是加密的反向运作<br/>
+把那堆打乱的东西重新还原，解密的过程中就需要用到密码<br/>
+只有那些拥有正确密码的人才能正确解密<br/>
+最早的加密和解密是共用一个密码的，加密的时候用一个<br/>
+密码把信息打乱，解密的时候就必须用同样的密码把信息还原<br/>
+这种方式很适合用来保存一些自己的文件<br/>
+你可以把你的文件加密起来存到硬盘甚至可以上传到网络硬盘<br/>
+即使有人盗取到了你的文件，他要是没有密码也是白费力气<br/>
+但是日常生活中我们往往需要运用加密的手段传递一些<br/>
+需要保密的消息。这个时候这种原始的加密方法就有点不适用了<br/>
+例如你把一条重要的消息加密起来发送给你的朋友<br/>
+你的朋友要是不知道你加密的时候使用了什么密码<br/>
+他就不知道你想表达什么，你要是把密码也发送给他<br/>
+那么密码在到达你朋友手里之前就可能已经被很多人看到了<br/>
+你的保密消息就变成了公开消息了<br/>
+这是一个难题，但是上天给我们一个难题之后一般会给一个答案<br/>
+非对称密码就是这个难题的答案<br/>
+所谓 非对称密码 是相对于 对称密码 来讲的<br/>
+原先加密解密用同一个密码看起来好像是对称的<br/>
+现在加密和解密用不同的密码，我们就叫它 非对称密码<br/>
+这种加密方法用到两个密码，它们是成对出现的<br/>
+其中一个密码叫做 公钥 另一个叫 私钥<br/>
+使用私钥加密的东西可以用私钥来解密同时也能用公钥来解密<br/>
+但是使用公钥加密的东西却不能用公钥来解密<br/>
+而是需要用私钥来解。正是由于这个特点公钥是可以公开的<br/>
+你可以让所有人都知道你的公钥。但是私钥就需要绝对保密<br/>
+一般来讲需要保密的东西最好是记在脑子里，这样谁也拿不走<br/>
+但是由于公钥实在太长了基本没人能记得住，所以我们需要<br/>
+把它保存到硬盘或者存储卡里面，直接保存当然不安全<br/>
+我们需要用对称密码的方式将私钥加密起来保存<br/>
+这样你只需要设置一个不是特别长的能记住的密码<br/>
+然后你就可以用这个不是特别长的密码<br/>
+解密还原那个很长不好记的私钥，再用这个私钥来解密还原<br/>
+你的朋友发送给你的机密消息</p>
+<p>再讲一下本程序的应用场景<br/>
+比如你要把你的某个重要的账号和密码发送给你的朋友<br/>
+直接用短信或者微信发总归不安全<br/>
+这时候我们这个小程序就能起到很好的辅助作用<br/>
+你的朋友需要运用本程序创建一对公钥和私钥<br/>
+然后把他的公钥发送给你，这时候你就可以用他的公钥<br/>
+来加密你的账号名称以及密码，然后把加密之后的那堆东西复制下来<br/>
+发送给你的朋友，他收到以后就能用他的私钥来解密<br/>
+还原出你的账号名称以及密码,整个过程不会有第三个人<br/>
+可以知道你的账号名称以及密码</p>
+<p>我们把这种消息的传递方式形象的称为隧道模式<br/>
+就仿佛有一条看神秘的隧道建立在你和你的朋友之间<br/>
+周围的人都知道你们做了些什么却不明白其中真意<br/>
+因为你们的真实意思是通过那条神秘隧道来传递的<br/>
+我有一个比喻来形容这种传递消息的方式<br/>
+好比两个很有默契的人在一个公共场合说了一些话<br/>
+我们可以看到他们的每一个动作听到他们的每一句话<br/>
+但是却不明白他们真正表达的意思是什么<br/>
+因为这是专属于他们两人之间的默契<br/>
+在互联网的环境下运用公钥和私钥的加密方式<br/>
+其实就可以在任意两个人之间建立起这种“默契”
+</p>
+</body>
+</html>
